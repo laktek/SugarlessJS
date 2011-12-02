@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+  <title>Sugarless Benchmarks</title>
+
+  <script type="text/javascript" src="vendor/jslitmus.js"></script>
+
+  <!-- include source files here... -->
+  <script type="text/javascript" src="vendor/jquery-1.7.1.js"></script>
+  <script type="text/javascript" src="../lib/sugarless.js"></script>
+
+  <!-- benchmarks -->
+  <script type="text/javascript">
+    var obj = [1, 2, 3, 4];
+    var string_obj = "test";
+    var sugarless_obj = Sugarless(obj);
+
+    JSLitmus.test('Sugarless initiation and call without arguments', function() {
+      Sugarless(obj)(
+        function(){ return this; } 
+      );
+    });
+
+    JSLitmus.test('Sugarless initiation and call seperated', function() {
+      sugarless_obj(
+        function(){ return this; } 
+      );
+    });
+
+    JSLitmus.test('jQuery custom method call', function() {
+      $.fn.testFunc = function(){ return this }
+      $([1, 2, 3, 4]).testFunc();
+    });
+
+    JSLitmus.test('native call without arguments', function() {
+      (function(){ return this }).call(obj);
+    });
+
+    JSLitmus.test('Sugarless call with arguments', function() {
+      sugarless_obj(
+        function(){ return this + arguments[0] + arguments[1]; }, "first", "second"
+      );
+    });
+
+    JSLitmus.test('native call with arguments', function() {
+      (function(){ return this + arguments[0] + arguments[1] }).call(obj, "first", "second");
+    });
+
+    JSLitmus.test('Sugarless multiple calls', function() {
+      sugarless_obj(
+        function(){ return this.push(5); } 
+       ,function(){ return this }
+      );
+    });
+
+    JSLitmus.test('native multiple calls', function() {
+      (function(){ return this}).call((function(){ return this.push(5) }).call(obj));
+    });
+  </script>
+
+  </head>
+
+<body>
+  <p>Yes, the speeds can be improved. Any contributions on that front are greatly appreciated. Go fork <a href="https://github.com/laktek/SugarlessJS">on GitHub</a></p>
+</body>
+</html>
+
