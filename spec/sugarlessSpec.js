@@ -173,8 +173,23 @@ describe("handling exceptions", function(){
 
 });
 
+describe("using Sugarless invoke", function(){
+  it("invokes the method with arguments given on the passing object", function(){
+    expect(Sugarless.invoke.call("Test", "charAt", 1)).toEqual("e") 
+  });
+
+  it("it can take arguments as an array", function(){
+    expect(Sugarless.invoke.call("Test", ["charAt", 1])).toEqual("e") 
+  });
+
+  it("inside the Sugarless block", function(){
+    expect(Sugarless("Test")( Sugarless.invoke, "charAt", 1)).toEqual("e") 
+  });
+
+});
+
 describe("some nice things", function(){
-  it("simple wrapper", function(){
+  it("simple alias", function(){
     var awesomeWrapper = Sugarless({}, {before: function(){ return "awesome" }}); 
     
     expect(awesomeWrapper( function(){ var val = arguments[0]; return val })).toEqual("awesome"); 
