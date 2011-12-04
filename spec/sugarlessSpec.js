@@ -36,16 +36,20 @@ describe("handling of the functions", function(){
     expect(function(){ Sugarless({})("no func")}).toThrow();
   });
 
+  it("should accept array of functions", function(){
+    expect(Sugarless({})([function(){ return "a" }, function(){ return "b" }])).toEqual("b");
+  });
+
   it("should set this of the function to passed object", function(){
     var passed_obj = {"a": "b"}; 
     expect(Sugarless(passed_obj)(function(){ return this; })).toBe(passed_obj);
   });
 
-  it("should pass the given parameters to the function", function(){
+  it("should pass the default arguments to the function", function(){
     expect(Sugarless({})(function(){ return arguments[0] + " " + arguments[1] }, "one", "two")).toEqual("one two");
   });
 
-  it("should return the last functions result as the final result", function(){
+  it("should return the last returned result as the final result", function(){
     expect(Sugarless({})(function(){ return "a" }, function(){ return "b" })).toEqual("b");
   });
 
@@ -53,7 +57,7 @@ describe("handling of the functions", function(){
     expect(Sugarless({})(function(){ return "a" }, function(){ var val = arguments[0]; return val; })).toEqual("a");
   });
 
-  it("should get the next function in queue", function(){
+  it("should pop the next function in queue", function(){
     var result = "";
     var second_func = function(){ return "second" };
     Sugarless({})(function(){ result = Sugarless.next(this)(); }, second_func);
@@ -68,22 +72,22 @@ describe("handling of the functions", function(){
     expect(Sugarless(obj)(function(){ return Sugarless.next(this)(); }, second_func)).toBe(obj);
   });
 
-  it("should pass the originally declared arguments to the next function", function(){
+  it("should pass the default arguments to the next function", function(){
     var second_func = function(){ return arguments[0] };
     
     expect(Sugarless({})(function(){ return Sugarless.next(this)(); }, second_func, "test arg")).toEqual("test arg");
   });
 
-  it("should give prcedence to arguments passed in the callback over original arguments", function(){
+  it("should override default arguments with the passed arguments", function(){
     var second_func = function(){ return arguments[0] };
     
     expect(Sugarless({})(function(){ return Sugarless.next(this)("callback arg"); }, second_func, "original arg")).toEqual("callback arg");
   });
 
-  it("should be possible to access original arguments when callback arguments are defined", function(){
+  it("should be possible to access default arguments if they were not overwritten", function(){
     var second_func = function(){ return arguments[1] };
     
-    expect(Sugarless({})(function(){ return Sugarless.next(this)("callback arg"); }, second_func, "original arg")).toEqual("original arg");
+    expect(Sugarless({})(function(){ return Sugarless.next(this)("callback arg"); }, second_func,  "original arg", "secondary arg")).toEqual("secondary arg");
   });
 
   it("will not execute the next function if the previous function doesn't return", function(){
@@ -98,10 +102,6 @@ describe("handling of the functions", function(){
     var obj = {};
     Sugarless(obj)( function(){ /* doesn't return or calls next */ }, function(){ } );
     expect(Sugarless(obj)(function(){ return "next block"; })).not.toEqual("next block");
-  });
-
-  it("should accept functions as an array", function(){
-    expect(Sugarless({})([function(){ return "a" }, function(){ return "b" }])).toEqual("b");
   });
 
 });
@@ -189,7 +189,7 @@ describe("using Sugarless invoke", function(){
 });
 
 describe("some nice things", function(){
-  it("simple alias", function(){
+  it("aliasing", function(){
     var awesomeWrapper = Sugarless({}, {before: function(){ return "awesome" }}); 
     
     expect(awesomeWrapper( function(){ var val = arguments[0]; return val })).toEqual("awesome"); 
