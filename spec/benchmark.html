@@ -30,7 +30,7 @@
 
     JSLitmus.test('jQuery custom method call', function() {
       $.fn.testFunc = function(){ return this }
-      $([1, 2, 3, 4]).testFunc();
+      $(obj).testFunc();
     });
 
     JSLitmus.test('native call without arguments', function() {
