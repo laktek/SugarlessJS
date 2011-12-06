@@ -19,7 +19,7 @@ describe("initating Sugarless", function() {
 });
 
 describe("dealing with null objects", function() {
-
+ 
   it("should return null when no default", function() {
     expect(Sugarless(null)(function(){ return "ok"})).toBeNull();
   });
@@ -65,6 +65,10 @@ describe("handling of the functions", function(){
     expect(result).toEqual("second");
   });
 
+  it("will not execute the next function if the previous function pops it", function(){
+    expect(Sugarless({})( function(){ Sugarless.next(this); }, function(){ return "second"; })).toBeUndefined();
+  });
+
   it("should bind reference of this to the next function", function(){
     var obj = {"a": "b"}; 
     var second_func = function(){ return this };
@@ -90,17 +94,13 @@ describe("handling of the functions", function(){
     expect(Sugarless({})(function(){ return Sugarless.next(this)("callback arg"); }, second_func,  "original arg", "secondary arg")).toEqual("secondary arg");
   });
 
-  it("will not execute the next function if the previous function doesn't return", function(){
-    expect(Sugarless({})( function(){ result = "first"; }, function(){ return "second"; })).toBeUndefined();
-  });
-
   it("calling next when no functions in the queue raises an exception", function(){
     expect( function(){ Sugarless({})( function(){ Sugarless.next(this) } );} ).toThrow("no function to run");
   });
 
   it("should queue the functions", function(){
     var obj = {};
-    Sugarless(obj)( function(){ /* doesn't return or calls next */ }, function(){ } );
+    Sugarless(obj)( function(){ Sugarless.next(this); }, function(){ } );
     expect(Sugarless(obj)(function(){ return "next block"; })).not.toEqual("next block");
   });
 
@@ -167,7 +167,7 @@ describe("handling exceptions", function(){
     expect(Sugarless({}, {error: error_func})( function(){ throw "An error" })).toEqual("error occurred");
   });
 
-  it("should throw the exception if no error handler is defined", function(){
+  it("should throw the exception normally, if no error handler is defined", function(){
     expect(function(){ Sugarless({})( function(){ throw "An error" }) }).toThrow("An error");
   });
 
