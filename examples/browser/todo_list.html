@@ -65,8 +65,6 @@
     /* DOM helpers */
     var domReady = function(callback){ document.addEventListener('DOMContentLoaded', callback); }
 
-    var dataStore =  (('localStorage' in window) && window['localStorage'] !== null) ? window['localStorage'] : {};
-
     var createElementFromTemplate = function(template){
         var item = template.cloneNode(true); 
         var classes = item.className.split(" ");
@@ -74,6 +72,17 @@
         item.className = classes.join(" ");
 
         return item;
+    };
+
+    var appendTo = function(container){
+      container.appendChild(this); 
+    };
+
+    var onClick = function(callbacks){
+      this.addEventListener('click', function(ev){
+        $_(this)( callbacks );
+        ev.preventDefault();
+      });
     };
 
     var onSubmit = function(callbacks){ 
@@ -84,25 +93,29 @@
     };
 
     /* Data Model Functions */
-    var fetchTasks = function(){ 
-      return JSON.parse(dataStore.getItem(this.id) || "[]"); 
+    var Store = {
+      conn: (('localStorage' in window) && window['localStorage'] !== null) ? window['localStorage'] : {},
+
+      fetch: function(){ 
+        return JSON.parse(Store.conn.getItem(this.id) || "[]"); 
+      },
+
+      push: function(item){ 
+        var items = Store.fetch.call(this);
+        items.push(item)
+
+        Store.conn.setItem(this.id, JSON.stringify(items)); 
+        return item; 
+      },
+
+      remove: function(item) { 
+        var items = Store.fetch.call(this);
+        items.splice(items.indexOf(item), 1);
+
+        Store.conn.setItem(this.id, JSON.stringify(items));
+      }
     };
 
-    var pushTask = function(task){ 
-      var tasks = fetchTasks.call(this);
-      tasks.push(task)
-
-      dataStore.setItem(this.id, JSON.stringify(tasks)); 
-      return task; 
-    };
-
-    var removeTask = function(task) { 
-      var tasks = fetchTasks.call(this);
-      tasks.splice(tasks.indexOf(task), 1);
-
-      dataStore.setItem(this.id, JSON.stringify(tasks));
-    };
-    
     /* UI Functions */
     var hideEmptyMessage = function(){
       var empty_message = this.querySelector("p.empty");
@@ -116,24 +129,34 @@
       }
     };
 
-    var addToList = function(item){
-      var template = this.querySelector('.template');
-
-      var element = createElementFromTemplate(template);
-      element.querySelector('span').innerHTML = item;
-      element.addEventListener('click', function(){
-       $("#todos")(
-          removeTask, item 
-        , removeFromList, this
-        , showEmptyMessage
-       )   
-      });
-      this.appendChild(element);
+    var setTaskContent = function(content){
+      this.querySelector('span').innerHTML = content; 
     };
 
     var removeFromList = function(item){
       this.removeChild(item);
-    }
+    };
+
+    var addToList = function(item){
+      var template = this.querySelector('.template');
+
+      $_(createElementFromTemplate(template))(
+         setTaskContent, item
+       , onClick, [removeTask]   
+       , appendTo, this
+      );
+    };
+
+    var removeTask = function(){
+      var element = this;
+      var item = element.querySelector('span').innerHTML
+
+      $("#todos")(
+          Store.remove, item 
+        , removeFromList, element
+        , showEmptyMessage
+      );
+    };
 
     var updateList = function(items){ 
       if(items.length){
@@ -148,12 +171,11 @@
       }
     };
 
-    /* Runs in the context of Form */
     var captureInput = function(){ return this.querySelector('input[type=text]').value };
 
     var saveTask = function(task){ 
       $("#todos")(
-        pushTask, task
+        Store.push, task
       , updateList
       );
     };
@@ -166,7 +188,7 @@
     domReady(function() {
 
       $("#todos")(
-        fetchTasks
+        Store.fetch
       , updateList
       );
 
