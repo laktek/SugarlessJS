@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <title>ToDo List</title>
+  <style>
+    body { background: #E7F8DD; margin:0; padding:0; font-family: Georgia, serif;} 
+    h1, h2 { text-align: center; }
+    ul { list-style:none; margin:0; padding:0; }
+    li { margin: 0; padding: 10px 0; border-bottom: 1px #6F806C solid; cursor: pointer; float:left; width: 100%; font-size: 110%;}
+    li span { padding-left: 10px; }
+    input { font-size: 110%; margin: 0 auto; width: 100%; min-width: 100px; padding: 5px; font-family: Georgia, serif;}
+    p { font-size: 75%;}
+
+    .template { display: none; visibility: hidden; }
+
+    #wrapper { min-height: 100%; position: relative; margin: 0 auto; max-width: 500px; min-width: 280px;  }
+    #maincontent { overflow: auto; margin-bottom: 120px;}
+    #footer { background: #807373; width: 100%; margin: 0 auto; padding: 20px 0; height: 90px; position: fixed; bottom:0;} 
+  	#footer .content { margin: 0 auto; max-width: 500px; min-width: 280px; }
+    #footer p { color: #ECE8E8;}
+    #footer p a, #footer p a:visited { color: #ECE8E8;}
+
+    .item_actions { display:none; margin: 0 10px; float: right; }
+    .item_actions a { height: 16px; width: 16px; text-decoration: none; color: #000; }
+    .item_actions a:visited {color: #000; }
+    li.task:hover .item_actions { display: block; }
+  </style>
+
+</head>
+<body>
+  <div id="wrapper">
+    <div class ="content" id="maincontent">
+      <h1>ToDo List</h1>
+      <ul id="todos" class="list">
+        <li class="template task">
+          <span style='float:left'>Dummy Item</span>
+          <div class="item_actions">
+            <a href='#' class='remove_item'>✓</a>
+          </div>
+        </li>
+
+        <p class="empty">No items in the list yet.</p>
+      </ul>
+    </div>
+  </div>
+  <div id="footer">
+      <div class="content">
+        <form id="new_entry">
+          <input type="text" value="" placeholder="Add new item to the list"/>
+        </form>
+        <p>Tip: You can move up an item by double-clicking on it.</p>
+        <p>By <a href="http://laktek.com">Lakshan Perera</a></p>
+      </div>
+  </div>
+
+  <script type="text/javascript" src="../../lib/sugarless.js"></script>
+  <script type="text/javascript">
+    /* Shorthands */
+    var $_ = Sugarless;
+    var $ = function(sel){ return $_(document.querySelector(sel)) };
+
+    /* DOM helpers */
+    var domReady = function(callback){ document.addEventListener('DOMContentLoaded', callback); }
+
+    var dataStore =  (('localStorage' in window) && window['localStorage'] !== null) ? window['localStorage'] : {};
+
+    var createElementFromTemplate = function(template){
+        var item = template.cloneNode(true); 
+        var classes = item.className.split(" ");
+        classes.splice(classes.indexOf("template"), 1);
+        item.className = classes.join(" ");
+
+        return item;
+    };
+
+    var onSubmit = function(callbacks){ 
+        this.addEventListener('submit', function(ev){ 
+          $_(this)( callbacks );
+          ev.preventDefault();
+        });
+    };
+
+    /* Data Model Functions */
+    var fetchTasks = function(){ 
+      return JSON.parse(dataStore.getItem(this.id) || "[]"); 
+    };
+
+    var pushTask = function(task){ 
+      var tasks = fetchTasks.call(this);
+      tasks.push(task)
+
+      dataStore.setItem(this.id, JSON.stringify(tasks)); 
+      return task; 
+    };
+
+    var removeTask = function(task) { 
+      var tasks = fetchTasks.call(this);
+      tasks.splice(tasks.indexOf(task), 1);
+
+      dataStore.setItem(this.id, JSON.stringify(tasks));
+    };
+    
+    /* UI Functions */
+    var hideEmptyMessage = function(){
+      var empty_message = this.querySelector("p.empty");
+      empty_message.style.display = "none";
+    };
+
+    var showEmptyMessage = function(){
+      if(!this.querySelector(".task:not(.template)")){
+        var empty_message = this.querySelector("p.empty");
+        empty_message.style.display = "block";
+      }
+    };
+
+    var addToList = function(item){
+      var template = this.querySelector('.template');
+
+      var element = createElementFromTemplate(template);
+      element.querySelector('span').innerHTML = item;
+      element.addEventListener('click', function(){
+       $("#todos")(
+          removeTask, item 
+        , removeFromList, this
+        , showEmptyMessage
+       )   
+      });
+      this.appendChild(element);
+    };
+
+    var removeFromList = function(item){
+      this.removeChild(item);
+    }
+
+    var updateList = function(items){ 
+      if(items.length){
+        hideEmptyMessage.call(this);
+
+        if(Array.isArray(items)){
+          items.forEach(addToList, this); 
+        } 
+        else {
+          addToList.call(this, items); 
+        }
+      }
+    };
+
+    /* Runs in the context of Form */
+    var captureInput = function(){ return this.querySelector('input[type=text]').value };
+
+    var saveTask = function(task){ 
+      $("#todos")(
+        pushTask, task
+      , updateList
+      );
+    };
+
+    var resetForm = function(){
+       this.querySelector('input[type=text]').value = "";
+    }
+
+    /* Behaviour calls */
+    domReady(function() {
+
+      $("#todos")(
+        fetchTasks
+      , updateList
+      );
+
+      $("#new_entry")(
+        onSubmit, [ captureInput, saveTask, resetForm ] 
+      );
+
+    }); 
+  </script>
+</body>
+</html>
