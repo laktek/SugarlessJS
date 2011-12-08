@@ -103,7 +103,7 @@
         });
     };
 
-    /* Data Model Functions */
+    /* Custom Functions */
     var Store = {
       conn: (('localStorage' in window) && window['localStorage'] !== null) ? window['localStorage'] : {},
 
@@ -127,109 +127,126 @@
       }
     };
 
-    /* UI Functions */
-    
-    var hideEmptyMessage = function(){
-      var empty_message = this.querySelector("p.empty");
-      empty_message.style.display = "none";
-    };
-
-    var showEmptyMessage = function(){
-      if(!this.querySelector(".task:not(.template)")){
+    var EmptyMessage = {
+      hide: function(){
         var empty_message = this.querySelector("p.empty");
-        empty_message.style.display = "block";
-      }
-    };
+        empty_message.style.display = "none";
+      },
 
-    var setTaskContent = function(content){
-      this.querySelector('span').innerHTML = content; 
-    };
-
-    var removeFromList = function(item){
-      this.removeChild(item);
-    };
-
-    var addToList = function(item){
-      var template = this.querySelector('.template');
-
-      $_(createElementFromTemplate(template), {noreturns: true})(
-         setTaskContent, item
-       , onClick, (this.id == "pending_todos" ? [completeTask] : [removeTask])
-       , prependTo, this
-      );
-    };
-
-    var updateList = function(items){ 
-      if(items.length){
-        hideEmptyMessage.call(this);
-
-        if(Array.isArray(items)){
-          items.forEach(addToList, this); 
-        } 
-        else {
-          addToList.call(this, items); 
+      show: function(){
+        if(!this.querySelector(".task:not(.template)")){
+          var empty_message = this.querySelector("p.empty");
+          empty_message.style.display = "block";
         }
       }
     };
 
-    var completeTask = function(){
-      var element = this;
-      var item = element.querySelector('span').innerHTML
+    var List = {
+      add: function(item){
 
-      // remove task from pending list
-      $("#pending_todos")(
-          Store.remove, item 
-        , removeFromList, element
-        , showEmptyMessage
-      );
+        if(item.length){
+          EmptyMessage.hide.call(this);
 
-      // add task to completed list
-      $("#completed_todos")(
-          Store.push, item 
-        , updateList
-      );
+          var template = this.querySelector('.template');
+
+          var _add = function(name){
+            $_(createElementFromTemplate(template), {noreturns: true})(
+               Task.setContent, name 
+             , onClick, (this.id == "pending_todos" ? [Task.complete] : [Task.remove])
+             , prependTo, this
+            );
+          };
+
+          if(Array.isArray(item)){
+            item.forEach(_add, this); 
+          } 
+          else {
+            _add.call(this, item); 
+          }
+        }
+      },
+
+      remove: function(item){
+        this.removeChild(item);
+      }
+      
     };
 
-    var removeTask = function(){
-      var element = this;
-      var item = element.querySelector('span').innerHTML
+    var Task = {
+      complete: function(){
+        var element = this;
+        var name = element.querySelector('span').innerHTML
 
-      // remove task from completed list
-      $("#completed_todos")(
-          Store.remove, item 
-        , removeFromList, element
-        , showEmptyMessage
-      );
+        // remove task from pending list
+        $("#pending_todos")(
+            Store.remove, name 
+          , List.remove, element
+          , EmptyMessage.show
+        );
+
+        // add task to completed list
+        $("#completed_todos")(
+            Store.push, name 
+          , List.add
+        );
+      },
+
+      remove: function(){
+        var element = this;
+        var name = element.querySelector('span').innerHTML
+
+        // remove task from completed list
+        $("#completed_todos")(
+            Store.remove, name 
+          , List.remove, element
+          , EmptyMessage.show
+        );
+      },
+
+      save: function(name){ 
+        $("#pending_todos")(
+          Store.push, name 
+        , List.add
+        );
+      },
+
+      setContent: function(content){
+        this.querySelector('span').innerHTML = content; 
+      }
     };
+    
+    var Form = {
+      captureInput: function(){ 
+        var input = this.querySelector('input[type=text]').value 
+        if(input.length){
+          return input;
+        }
+        else {
+          alert("Task can't be empty");
+          $_.clear(this); //clears the remaining functions queue
+        }
+      },
 
-    var saveTask = function(task){ 
-      $("#pending_todos")(
-        Store.push, task
-      , updateList
-      );
-    };
-
-    var captureInput = function(){ return this.querySelector('input[type=text]').value };
-
-    var resetForm = function(){
+      reset: function(){
        this.querySelector('input[type=text]').value = "";
-    }
+      }
+    };
 
     /* Behaviour calls */
     domReady(function() {
 
       $("#pending_todos")(
         Store.fetch
-      , updateList
+      , List.add
       );
 
       $("#completed_todos")(
         Store.fetch
-      , updateList
+      , List.add
       );
 
       $("#new_entry")(
-        onSubmit, [ captureInput, saveTask, resetForm ] 
+        onSubmit, [ Form.captureInput, Task.save, Form.reset ] 
       );
 
     }); 

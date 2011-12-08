@@ -106,6 +106,22 @@ describe("handling of the functions", function(){
 
 });
 
+describe("Calling Clear", function(){
+  it("should not execute the next function in queue", function(){
+    expect( Sugarless({})( function(){ Sugarless.clear(this); }, function(){ return "next result"} ) ).not.toEqual("next result");
+  });
+
+  it("should clear the function queue", function(){
+    var obj = {};
+    Sugarless(obj)( function(){ Sugarless.next(this); Sugarless.clear(this); }, function(){ }, function(){ } );
+    expect(Sugarless(obj)(function(){ return "next block"; })).toEqual("next block");
+  });
+
+  it("should not affect the execution of current function", function(){
+    expect( Sugarless({})( function(){ Sugarless.clear(this); return "current result" }, function(){ return "next result"} ) ).toEqual("current result");
+  });
+});
+
 describe("with noreturn option", function(){
   it("shouldn't pass the result of previous function to the next", function(){
     var second_func = function(){ return arguments[0] };
