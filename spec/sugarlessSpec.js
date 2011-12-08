@@ -106,6 +106,14 @@ describe("handling of the functions", function(){
 
 });
 
+describe("with noreturn option", function(){
+  it("shouldn't pass the result of previous function to the next", function(){
+    var second_func = function(){ return arguments[0] };
+    
+    expect(Sugarless({}, { noreturn: true })(function(){ return Sugarless.next(this)("callback arg"); }, second_func, "original arg")).toEqual("original arg");
+  })
+})
+
 describe("before callback", function(){
 
   it("excutes before all other functions", function(){

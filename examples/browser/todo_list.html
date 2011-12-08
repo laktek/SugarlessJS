@@ -27,6 +27,8 @@
     .item_actions a { height: 16px; width: 16px; text-decoration: none; color: #000; }
     .item_actions a:visited {color: #000; }
     li.task:hover .item_actions { display: block; }
+
+    #completed_todos span {text-decoration: line-through;}
   </style>
 
 </head>
@@ -34,7 +36,13 @@
   <div id="wrapper">
     <div class ="content" id="maincontent">
       <h1>ToDo List</h1>
-      <ul id="todos" class="list">
+
+      <form id="new_entry">
+        <input type="text" value="" placeholder="Add item"/>
+      </form>
+
+      <h3>Pending</h3>
+      <ul id="pending_todos" class="list">
         <li class="template task">
           <span style='float:left'>Dummy Item</span>
           <div class="item_actions">
@@ -42,18 +50,21 @@
           </div>
         </li>
 
-        <p class="empty">No items in the list yet.</p>
+        <p class="empty">No pending items.</p>
+      </ul>
+
+      <h3>Completed</h3>
+      <ul id="completed_todos" class="list">
+        <li class="template task">
+          <span style='float:left'>Dummy Item</span>
+          <div class="item_actions">
+            <a href='#' class='remove_item'>☓</a>
+          </div>
+        </li>
+
+        <p class="empty">No completed items.</p>
       </ul>
     </div>
-  </div>
-  <div id="footer">
-      <div class="content">
-        <form id="new_entry">
-          <input type="text" value="" placeholder="Add new item to the list"/>
-        </form>
-        <p>Tip: You can move up an item by double-clicking on it.</p>
-        <p>By <a href="http://laktek.com">Lakshan Perera</a></p>
-      </div>
   </div>
 
   <script type="text/javascript" src="../../lib/sugarless.js"></script>
@@ -74,8 +85,8 @@
         return item;
     };
 
-    var appendTo = function(container){
-      container.appendChild(this); 
+    var prependTo = function(container){
+      container.insertBefore(this, container.firstChild); 
     };
 
     var onClick = function(callbacks){
@@ -117,6 +128,7 @@
     };
 
     /* UI Functions */
+    
     var hideEmptyMessage = function(){
       var empty_message = this.querySelector("p.empty");
       empty_message.style.display = "none";
@@ -140,21 +152,10 @@
     var addToList = function(item){
       var template = this.querySelector('.template');
 
-      $_(createElementFromTemplate(template))(
+      $_(createElementFromTemplate(template), {noreturns: true})(
          setTaskContent, item
-       , onClick, [removeTask]   
-       , appendTo, this
-      );
-    };
-
-    var removeTask = function(){
-      var element = this;
-      var item = element.querySelector('span').innerHTML
-
-      $("#todos")(
-          Store.remove, item 
-        , removeFromList, element
-        , showEmptyMessage
+       , onClick, (this.id == "pending_todos" ? [completeTask] : [removeTask])
+       , prependTo, this
       );
     };
 
@@ -171,14 +172,44 @@
       }
     };
 
-    var captureInput = function(){ return this.querySelector('input[type=text]').value };
+    var completeTask = function(){
+      var element = this;
+      var item = element.querySelector('span').innerHTML
+
+      // remove task from pending list
+      $("#pending_todos")(
+          Store.remove, item 
+        , removeFromList, element
+        , showEmptyMessage
+      );
+
+      // add task to completed list
+      $("#completed_todos")(
+          Store.push, item 
+        , updateList
+      );
+    };
+
+    var removeTask = function(){
+      var element = this;
+      var item = element.querySelector('span').innerHTML
+
+      // remove task from completed list
+      $("#completed_todos")(
+          Store.remove, item 
+        , removeFromList, element
+        , showEmptyMessage
+      );
+    };
 
     var saveTask = function(task){ 
-      $("#todos")(
+      $("#pending_todos")(
         Store.push, task
       , updateList
       );
     };
+
+    var captureInput = function(){ return this.querySelector('input[type=text]').value };
 
     var resetForm = function(){
        this.querySelector('input[type=text]').value = "";
@@ -187,7 +218,12 @@
     /* Behaviour calls */
     domReady(function() {
 
-      $("#todos")(
+      $("#pending_todos")(
+        Store.fetch
+      , updateList
+      );
+
+      $("#completed_todos")(
         Store.fetch
       , updateList
       );
