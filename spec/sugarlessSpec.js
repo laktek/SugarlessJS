@@ -8,9 +8,9 @@ describe("initating Sugarless", function() {
     expect(Sugarless("test"), {defaultObj: ""}).toBeDefined();
   });
 
-  it("should throw an exception if called without an object", function(){
-   expect(function(){ Sugarless() }).toThrow(); 
-  });
+  // it("should throw an exception if called without an object", function(){
+  //  expect(function(){ Sugarless() }).toThrow(); 
+  // });
 
   it("should return a function", function(){
     expect(typeof Sugarless("test")).toEqual("function");
@@ -212,7 +212,7 @@ describe("using Sugarless invoke", function(){
 
 });
 
-describe("some nice things", function(){
+describe("some more nice things", function(){
   it("aliasing", function(){
     var awesomeWrapper = Sugarless({}, {before: function(){ return "awesome" }}); 
     
@@ -243,6 +243,12 @@ describe("some nice things", function(){
        , substractOne
      )
    ).toEqual([3, 5, 7, 9]); 
+  });
+
+  it("works with the strict mode", function(){
+    "use strict";
+    var strict_func = function(){ return "strict mode" }
+    expect(Sugarless({})( strict_func )).toEqual("strict mode"); 
   });
 
 })
