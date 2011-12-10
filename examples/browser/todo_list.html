@@ -105,25 +105,33 @@
 
     /* Custom Functions */
     var Store = {
-      conn: (('localStorage' in window) && window['localStorage'] !== null) ? window['localStorage'] : {},
+      polyfill: { data: [], getItem: function(){ return JSON.stringify(this.data); }, setItem: function(){ return this.data.push(arguments[0]) } },
 
       fetch: function(){ 
-        return JSON.parse(Store.conn.getItem(this.id) || "[]"); 
+        return $_(window['localStorage'], { defaultObj: Store.polyfill })(
+            $_.invoke, "getItem", this.id 
+          , JSON.parse
+        );
       },
 
       push: function(item){ 
         var items = Store.fetch.call(this);
         items.push(item)
 
-        Store.conn.setItem(this.id, JSON.stringify(items)); 
-        return item; 
+        $_(window['localStorage'], { defaultObj: Store.polyfill })(
+          $_.invoke, ["setItem", JSON.stringify(items)] 
+        );
+
+        return item;
       },
 
       remove: function(item) { 
         var items = Store.fetch.call(this);
         items.splice(items.indexOf(item), 1);
 
-        Store.conn.setItem(this.id, JSON.stringify(items));
+        $_(window['localStorage'], { defaultObj: Store.polyfill })(
+          $_.invoke, ["setItem", JSON.stringify(items)] 
+        );
       }
     };
 
