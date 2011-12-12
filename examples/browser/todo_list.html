@@ -110,6 +110,7 @@
       fetch: function(){ 
         return $_(window['localStorage'], { defaultObj: Store.polyfill })(
             $_.invoke, "getItem", this.id 
+          , function(){ return arguments[0] }, "[]" //pass a default value
           , JSON.parse
         );
       },
@@ -119,7 +120,7 @@
         items.push(item)
 
         $_(window['localStorage'], { defaultObj: Store.polyfill })(
-          $_.invoke, ["setItem", JSON.stringify(items)] 
+          $_.invoke, ["setItem", this.id, JSON.stringify(items)] 
         );
 
         return item;
@@ -130,7 +131,7 @@
         items.splice(items.indexOf(item), 1);
 
         $_(window['localStorage'], { defaultObj: Store.polyfill })(
-          $_.invoke, ["setItem", JSON.stringify(items)] 
+          $_.invoke, ["setItem", this.id, JSON.stringify(items)] 
         );
       }
     };
@@ -231,7 +232,7 @@
         }
         else {
           alert("Task can't be empty");
-          $_.clear(this); //clears the remaining functions queue
+          $_(this).clear(); //clears the remaining functions queue
         }
       },
 

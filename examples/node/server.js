@@ -10,7 +10,7 @@ var getName = function(){
 
 var getLocation = function(params){
   var user_ip = this.connection.remoteAddress;
-  var callback = $_.next(this); //extract the next function in queue
+  var callback = $_(this).next(); //extract the next function in queue
 
   var client = http.createClient(80, "www.geoplugin.net");
   var request = client.request("GET", "/json.gp?ip=" + user_ip, {'host': 'www.geoplugin.net'});
