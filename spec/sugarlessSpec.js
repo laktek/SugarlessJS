@@ -145,12 +145,16 @@ describe("calling clear", function(){
 
 describe("getters and setters for context", function(){
 
+  it("should return the set value", function(){
+    expect(Sugarless({})(function(){ return Sugarless(this).set("test", "value") })).toEqual("value");
+  });
+
   it("should get the previously set value", function(){
     expect(Sugarless({})(function(){ Sugarless(this).set("test", "value") }, function(){ return Sugarless(this).get("test") })).toEqual("value");
   });
 
   it("should be possible to get and set at the top level", function(){
-    expect(Sugarless({})( Sugarless.set, "test", "value", Sugarless.get, "test" )).toEqual("value");
+    expect(Sugarless({}, {noreturn: true})( Sugarless.set, "test", "value", Sugarless.get, "test" )).toEqual("value");
   });
 
   it("should throw an error when property to get is not defined", function(){
@@ -289,6 +293,46 @@ describe("some more nice things", function(){
        , substractOne
      )
    ).toEqual([3, 5, 7, 9]); 
+  });
+
+  it("supports recursion", function(){
+    var result = null;
+
+    var sayItFor = function(count){
+      var callback = Sugarless(this).next();
+      var _sayItFor = function(c){
+        if(c === 0){
+          callback(Sugarless(this).get('msg'));
+        }
+        else {
+          var msg = Sugarless(this).get('msg') || [];
+          Sugarless(this).set('msg', msg.concat(this) );
+          _sayItFor.call(this, --c) 
+        }
+      }
+      _sayItFor.call(this, count);
+      
+    };
+
+    var sayGoodBye = function(){
+      var msg = Sugarless(this).get('msg') || [];
+      Sugarless(this).set('msg', msg.concat(["Good bye!"]));
+      Sugarless(this).done();
+    };
+
+    Sugarless(["Hello"], { after: function(){ result = Sugarless(this).get('msg').join(" "); } })(
+       sayItFor, 5 
+     , sayGoodBye
+    );
+
+    waitsFor(function() {
+      return result;
+    }, "result never returned", 1000);
+
+    runs(function () {
+      expect(result).toEqual("Hello Hello Hello Hello Hello Good bye!");
+    });
+     
   });
 
   it("works with the strict mode", function(){
