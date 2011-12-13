@@ -20,8 +20,8 @@ describe("dealing with null objects", function() {
     expect(Sugarless(null)(function(){ return "ok"})).toBeNull();
   });
 
-  it("should use default if its given", function(){
-    expect(Sugarless(null, {defaultObj: "ok"})(function(){ return this})).toEqual("ok");
+  it("should use fallback if its given", function(){
+    expect(Sugarless(null, {fallback: "ok"})(function(){ return this})).toEqual("ok");
   });
 
 });
