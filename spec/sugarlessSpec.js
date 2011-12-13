@@ -53,7 +53,7 @@ describe("normal flow", function(){
     expect(Sugarless({})(function(){ return "a" }, function(){ var val = arguments[0]; return val; })).toEqual("a");
   });
 
-  it("should queue the functions", function(){
+  it("should not execute the next context queue if there's a running context queue for an object", function(){
     var obj = {};
     Sugarless(obj)( function(){ Sugarless(this).next(); }, function(){ } );
     expect(Sugarless(obj)(function(){ return "next block"; })).not.toEqual("next block");
@@ -61,7 +61,7 @@ describe("normal flow", function(){
 
 });
 
-describe("controlling the flow with next", function(){
+describe("calling next", function(){
 
   it("should pop the next function in queue", function(){
     var result = "";
@@ -71,7 +71,11 @@ describe("controlling the flow with next", function(){
     expect(result).toEqual("second");
   });
 
-  it("will not execute the next function if the previous function pops it", function(){
+  it("will not return the value of the function", function(){
+    expect(Sugarless({})( function(){ Sugarless(this).next(); return "first" }, function(){ return "second"; })).not.toEqual("first");
+  });
+
+  it("will not execute the next function afterwards", function(){
     expect(Sugarless({})( function(){ Sugarless(this).next(); }, function(){ return "second"; })).toBeUndefined();
   });
 
@@ -100,10 +104,27 @@ describe("controlling the flow with next", function(){
     expect(Sugarless({})(function(){ return Sugarless(this).next()("callback arg"); }, second_func,  "original arg", "secondary arg")).toEqual("secondary arg");
   });
 
-  it("calling next when no functions in the queue raises an exception", function(){
+  it("raises an exception if there are no functions in the queue", function(){
     expect( function(){ Sugarless({})( function(){ Sugarless(this).next() } );} ).toThrow("no function to run");
   });
 
+});
+
+describe("calling done", function(){
+  it("decrements the running functions count", function(){
+    expect( Sugarless({})( function(){  }, function(){  }, function(){ Sugarless(this).done(); return Sugarless(this).get('_running')  } ) ).toEqual(1);
+  }); 
+
+  it("shouldn't set a negative value to running functions count", function(){
+    expect( Sugarless({})( function(){ Sugarless(this).done(); return Sugarless(this).get('_running') } ) ).toEqual(0);
+  });
+
+  it("calls the after function when there are no running functions", function(){
+    var after_func = function(){ return "after" }
+    expect( Sugarless({}, {after: after_func})( 
+            function(){  }, function(){  }, 
+            function(){ Sugarless(this).done(); Sugarless(this).done(); return "finished" } ) ).toEqual("after");
+  });
 });
 
 describe("calling clear", function(){
@@ -148,7 +169,7 @@ describe("with noreturn option", function(){
     
     expect(Sugarless({}, { noreturn: true })(function(){ return Sugarless(this).next()("callback arg"); }, second_func, "original arg")).toEqual("original arg");
   })
-})
+});
 
 describe("before callback", function(){
 
@@ -182,20 +203,25 @@ describe("before callback", function(){
 
 describe("after callback", function(){
 
-  it("excutes after all other functions", function(){
+  it("excutes after all other functions are completed", function(){
     var after_func = function(){ return "after"; };
 
     expect(Sugarless({}, {after: after_func})(function(){ return "body"; })).toEqual("after");
   });
 
+  it("will not exectue if there are pending functions"), function(){
+    var after_func = function(){ return "after"; };
+    Sugarless({}, {after: after_func})( function(){ }).not.toEqual("after"); 
+  }
+
   it("should have reference to this", function(){
     var obj = {};
     var after_func = function(){ return this; };
 
-    expect(Sugarless(obj, {after: after_func})()).toBe(obj);
+    expect(Sugarless(obj, {after: after_func})( function(){ return "test" })).toBe(obj);
   });
 
-  it("should receive the result of last function as an argument", function(){
+  it("should receive the result of last function as an argument (if available)", function(){
     var obj = {};
     var after_func = function(){ var val = arguments[0]; return val + " after"; };
 
