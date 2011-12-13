@@ -6,22 +6,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <title>ToDo List</title>
   <style>
-    body { background: #E7F8DD; margin:0; padding:0; font-family: Georgia, serif;} 
+    body { margin:0; padding:0; font-family: Georgia, serif;} 
     h1, h2 { text-align: center; }
-    ul { list-style:none; margin:0; padding:0; }
+    h3 { margin: 0.5em 0; float: left; width: 100%; }
+    ul { list-style:none; margin:0 0 0.5em 0; padding:0; float: left; width: 100%; }
     li { margin: 0; padding: 10px 0; border-bottom: 1px #6F806C solid; cursor: pointer; float:left; width: 100%; font-size: 110%;}
     li span { padding-left: 10px; }
+    form { margin-bottom: 0.5em; }
     input { font-size: 110%; margin: 0 auto; width: 100%; min-width: 100px; padding: 5px; font-family: Georgia, serif;}
     p { font-size: 75%;}
 
     .template { display: none; visibility: hidden; }
 
-    #wrapper { min-height: 100%; position: relative; margin: 0 auto; max-width: 500px; min-width: 280px;  }
-    #maincontent { overflow: auto; margin-bottom: 120px;}
-    #footer { background: #807373; width: 100%; margin: 0 auto; padding: 20px 0; height: 90px; position: fixed; bottom:0;} 
-  	#footer .content { margin: 0 auto; max-width: 500px; min-width: 280px; }
-    #footer p { color: #ECE8E8;}
-    #footer p a, #footer p a:visited { color: #ECE8E8;}
+    #wrapper { min-height: 100%; position: relative; margin: 0 auto; width: 60%; min-width: 280px;  }
 
     .item_actions { display:none; margin: 0 10px; float: right; }
     .item_actions a { height: 16px; width: 16px; text-decoration: none; color: #000; }
@@ -58,7 +55,7 @@
         <li class="template task">
           <span style='float:left'>Dummy Item</span>
           <div class="item_actions">
-            <a href='#' class='remove_item'>☓</a>
+            <a href='#' class='remove_item'>×</a>
           </div>
         </li>
 
