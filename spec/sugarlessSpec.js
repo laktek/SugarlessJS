@@ -312,6 +312,14 @@ describe("some more nice things", function(){
       }
       _sayItFor.call(this, count);
       
+      // if(count === 0){
+      //   Sugarless(this).next()(Sugarless(this).get('msg'));
+      // }
+      // else {
+      //   var msg = Sugarless(this).get('msg') || [];
+      //   Sugarless(this).set('msg', msg.concat(this) );
+      //   Sugarless(this).recurse(--count); 
+      // }
     };
 
     var sayGoodBye = function(){
@@ -320,7 +328,7 @@ describe("some more nice things", function(){
       Sugarless(this).done();
     };
 
-    Sugarless(["Hello"], { after: function(){ result = Sugarless(this).get('msg').join(" "); } })(
+    Sugarless("Hello", { after: function(){ result = Sugarless(this).get('msg').join(" "); } })(
        sayItFor, 5 
      , sayGoodBye
     );
