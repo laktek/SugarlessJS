@@ -1,14 +1,14 @@
 describe("initating Sugarless", function() {
 
-  it("should accept an object", function() {
+  it("accepts an object", function() {
     expect(Sugarless("test")).toBeDefined();
   });
 
-  it("should accept optional parameters", function(){
+  it("accepts optional parameters", function(){
     expect(Sugarless("test"), {defaultObj: ""}).toBeDefined();
   });
 
-  it("should return a function", function(){
+  it("returns a function", function(){
     expect(typeof Sugarless("test")).toEqual("function");
   });
 
@@ -16,11 +16,11 @@ describe("initating Sugarless", function() {
 
 describe("dealing with null objects", function() {
  
-  it("should return null when no default", function() {
+  it("returns null when no default", function() {
     expect(Sugarless(null)(function(){ return "ok"})).toBeNull();
   });
 
-  it("should use fallback if its given", function(){
+  it("will use given fallback", function(){
     expect(Sugarless(null, {fallback: "ok"})(function(){ return this})).toEqual("ok");
   });
 
@@ -28,32 +28,32 @@ describe("dealing with null objects", function() {
 
 describe("normal flow", function(){
 
-  it("should raise an excpetion if no functions were passed", function() {
+  it("raises an excpetion if no functions were passed", function() {
     expect(function(){ Sugarless({})("no func")}).toThrow();
   });
 
-  it("should accept array of functions", function(){
+  it("accepts an array of functions", function(){
     expect(Sugarless({})([function(){ return "a" }, function(){ return "b" }])).toEqual("b");
   });
 
-  it("should set this of the function to passed object", function(){
+  it("sets this of the function to passed object", function(){
     var passed_obj = {"a": "b"}; 
     expect(Sugarless(passed_obj)(function(){ return this; })).toBe(passed_obj);
   });
 
-  it("should pass the default arguments to the function", function(){
+  it("passes the default arguments to the function", function(){
     expect(Sugarless({})(function(){ return arguments[0] + " " + arguments[1] }, "one", "two")).toEqual("one two");
   });
 
-  it("should return the last returned result as the final result", function(){
+  it("returns the last returned result as the final result", function(){
     expect(Sugarless({})(function(){ return "a" }, function(){ return "b" })).toEqual("b");
   });
 
-  it("should pass the result of previous function to the next", function(){
+  it("passes the result of previous function to the next", function(){
     expect(Sugarless({})(function(){ return "a" }, function(){ var val = arguments[0]; return val; })).toEqual("a");
   });
 
-  it("should not execute the next context queue if there's a running context queue for an object", function(){
+  it("will not execute the next context queue if there's a running context queue for an object", function(){
     var obj = {};
     Sugarless(obj)( function(){ Sugarless(this).next(); }, function(){ } );
     expect(Sugarless(obj)(function(){ return "next block"; })).not.toEqual("next block");
@@ -63,7 +63,7 @@ describe("normal flow", function(){
 
 describe("calling next", function(){
 
-  it("should pop the next function in queue", function(){
+  it("pops the next function in queue", function(){
     var result = "";
     var second_func = function(){ return "second" };
     Sugarless({})(function(){ result = Sugarless(this).next()(); }, second_func);
@@ -75,30 +75,30 @@ describe("calling next", function(){
     expect(Sugarless({})( function(){ Sugarless(this).next(); return "first" }, function(){ return "second"; })).not.toEqual("first");
   });
 
-  it("will not execute the next function afterwards", function(){
-    expect(Sugarless({})( function(){ Sugarless(this).next(); }, function(){ return "second"; })).toBeUndefined();
+  it("will stop the execution cycle afterwards", function(){
+    expect(Sugarless({})( function(){ Sugarless(this).next(); }, function(){ return "second"; }, function(){ return "third" })).toBeUndefined();
   });
 
-  it("should bind reference of this to the next function", function(){
+  it("binds the reference of this to the next function", function(){
     var obj = {"a": "b"}; 
     var second_func = function(){ return this };
     
     expect(Sugarless(obj)(function(){ return Sugarless(this).next()(); }, second_func)).toBe(obj);
   });
 
-  it("should pass the default arguments to the next function", function(){
+  it("passes the default arguments to the next function", function(){
     var second_func = function(){ return arguments[0] };
     
     expect(Sugarless({})(function(){ return Sugarless(this).next()(); }, second_func, "test arg")).toEqual("test arg");
   });
 
-  it("should override default arguments with the passed arguments", function(){
+  it("overrides default arguments with the passed arguments", function(){
     var second_func = function(){ return arguments[0] };
     
     expect(Sugarless({})(function(){ return Sugarless(this).next()("callback arg"); }, second_func, "original arg")).toEqual("callback arg");
   });
 
-  it("should be possible to access default arguments if they were not overwritten", function(){
+  it("is possible to access default arguments if they were not overwritten", function(){
     var second_func = function(){ return arguments[1] };
     
     expect(Sugarless({})(function(){ return Sugarless(this).next()("callback arg"); }, second_func,  "original arg", "secondary arg")).toEqual("secondary arg");
@@ -115,7 +115,7 @@ describe("calling done", function(){
     expect( Sugarless({})( function(){  }, function(){  }, function(){ Sugarless(this).done(); return Sugarless(this).get('_running')  } ) ).toEqual(1);
   }); 
 
-  it("shouldn't set a negative value to running functions count", function(){
+  it("doesn't set a negative value to running functions count", function(){
     expect( Sugarless({})( function(){ Sugarless(this).done(); return Sugarless(this).get('_running') } ) ).toEqual(0);
   });
 
@@ -127,48 +127,104 @@ describe("calling done", function(){
   });
 });
 
+describe("calling recurse", function(){
+
+  it("calls the current function again", function(){
+    var result = 0;
+    Sugarless({}, {before: function(){ return 1; }})( function(c){ result++; if(c > 0) { Sugarless(this).recurse(--c)} } );
+    expect(result).toEqual(2);
+  });
+
+  it("calls the next function when returns", function(){
+    var result = 0;
+    expect( 
+     Sugarless({}, {before: function(){ return 1; }})( 
+         function(c){ 
+           result++; 
+           if(c > 0){
+             return Sugarless(this).recurse(--c); 
+           }
+           else{
+             return result; 
+           }
+         }
+       , function(){ return result + 5; }
+     )
+   ).toEqual(7);
+  });
+
+  it("passes the current reference to this", function(){
+    var obj = {};
+    expect(Sugarless(obj, {before: function(){ return 1; }})( 
+      function(c){ 
+        if(c > 0) { 
+          return Sugarless(this).recurse(--c)
+        } 
+        else {
+          return this 
+        }
+      } )
+    ).toEqual(obj);
+  });
+
+  it("passes the default arguments", function(){
+    expect(Sugarless({}, {before: function(){ return 1; }})( 
+      function(c){ 
+        if(c > 0) { 
+          return Sugarless(this).recurse(--c)
+        } 
+        else {
+          return arguments[1] 
+        }
+      }, "", "argument" )
+    ).toEqual("argument");
+
+  });
+
+});
+
 describe("calling clear", function(){
-  it("should not execute the next function in queue", function(){
+  it("will not execute the next function in queue", function(){
     expect( Sugarless({})( function(){ Sugarless(this).clear(); }, function(){ return "next result"} ) ).not.toEqual("next result");
   });
 
-  it("should clear the function queue", function(){
+  it("clears the function queue", function(){
     var obj = {};
     Sugarless(obj)( function(){ Sugarless(this).next(); Sugarless(this).clear(); }, function(){ }, function(){ } );
     expect(Sugarless(obj)(function(){ return "next block"; })).toEqual("next block");
   });
 
-  it("should not affect the execution of current function", function(){
+  it("does not affect the execution of current function", function(){
     expect( Sugarless({})( function(){ Sugarless(this).clear(); return "current result" }, function(){ return "next result"} ) ).toEqual("current result");
   });
 });
 
 describe("getters and setters for context", function(){
 
-  it("should return the set value", function(){
+  it("returns the set value", function(){
     expect(Sugarless({})(function(){ return Sugarless(this).set("test", "value") })).toEqual("value");
   });
 
-  it("should get the previously set value", function(){
+  it("gets the previously set value", function(){
     expect(Sugarless({})(function(){ Sugarless(this).set("test", "value") }, function(){ return Sugarless(this).get("test") })).toEqual("value");
   });
 
-  it("should be possible to get and set at the top level", function(){
+  it("get and set can be called from top level", function(){
     expect(Sugarless({}, {noreturn: true})( Sugarless.set, "test", "value", Sugarless.get, "test" )).toEqual("value");
   });
 
-  it("should throw an error when property to get is not defined", function(){
+  it("throws an error when property to get is not defined", function(){
     expect(function(){ Sugarless({})( Sugarless.get )}).toThrow();
   });
 
-  it("should throw an error when property to set is not defined", function(){
+  it("throws an error when property to set is not defined", function(){
     expect(function(){ Sugarless({})( Sugarless.set )}).toThrow();
   });
 
 });
 
 describe("with noreturn option", function(){
-  it("shouldn't pass the result of previous function to the next", function(){
+  it("will not pass the result of previous function to the next", function(){
     var second_func = function(){ return arguments[0] };
     
     expect(Sugarless({}, { noreturn: true })(function(){ return Sugarless(this).next()("callback arg"); }, second_func, "original arg")).toEqual("original arg");
@@ -184,7 +240,7 @@ describe("before callback", function(){
     expect(Sugarless({}, {before: before_func})(function(){ return result; })).toEqual("before");
   });
 
-  it("should have reference to this", function(){
+  it("has reference to this", function(){
     var obj = {};
     var before_func = function(){ return this; };
 
@@ -218,14 +274,14 @@ describe("after callback", function(){
     Sugarless({}, {after: after_func})( function(){ }).not.toEqual("after"); 
   }
 
-  it("should have reference to this", function(){
+  it("has a reference to this", function(){
     var obj = {};
     var after_func = function(){ return this; };
 
     expect(Sugarless(obj, {after: after_func})( function(){ return "test" })).toBe(obj);
   });
 
-  it("should receive the result of last function as an argument (if available)", function(){
+  it("receives the result of last function as an argument (if available)", function(){
     var obj = {};
     var after_func = function(){ var val = arguments[0]; return val + " after"; };
 
@@ -235,13 +291,13 @@ describe("after callback", function(){
 });
 
 describe("handling exceptions", function(){
-  it("should call error handler when an exception is throwed", function(){
+  it("calls error handler when an exception is throwed", function(){
     var error_func = function(){ return "error occurred"; };
 
     expect(Sugarless({}, {error: error_func})( function(){ throw "An error" })).toEqual("error occurred");
   });
 
-  it("should throw the exception normally, if no error handler is defined", function(){
+  it("throws the exception normally, if no error handler is defined", function(){
     expect(function(){ Sugarless({})( function(){ throw "An error" }) }).toThrow("An error");
   });
 
@@ -256,7 +312,7 @@ describe("using Sugarless invoke", function(){
     expect(Sugarless.invoke.call("Test", ["charAt", 1])).toEqual("e") 
   });
 
-  it("inside the Sugarless block", function(){
+  it("can be used inside a Sugarless context", function(){
     expect(Sugarless("Test")( Sugarless.invoke, "charAt", 1)).toEqual("e") 
   });
 
@@ -295,31 +351,18 @@ describe("some more nice things", function(){
    ).toEqual([3, 5, 7, 9]); 
   });
 
-  it("supports recursion", function(){
+  it("using recursion and after callback", function(){
     var result = null;
 
-    var sayItFor = function(count){
-      var callback = Sugarless(this).next();
-      var _sayItFor = function(c){
-        if(c === 0){
-          callback(Sugarless(this).get('msg'));
-        }
-        else {
-          var msg = Sugarless(this).get('msg') || [];
-          Sugarless(this).set('msg', msg.concat(this) );
-          _sayItFor.call(this, --c) 
-        }
+    var repeatFor = function(count){
+      if(count === 0){
+        return Sugarless(this).get('msg');
       }
-      _sayItFor.call(this, count);
-      
-      // if(count === 0){
-      //   Sugarless(this).next()(Sugarless(this).get('msg'));
-      // }
-      // else {
-      //   var msg = Sugarless(this).get('msg') || [];
-      //   Sugarless(this).set('msg', msg.concat(this) );
-      //   Sugarless(this).recurse(--count); 
-      // }
+      else {
+        var msg = Sugarless(this).get('msg') || [];
+        Sugarless(this).set('msg', msg.concat(this) );
+        Sugarless(this).recurse(--count); 
+      }
     };
 
     var sayGoodBye = function(){
@@ -329,7 +372,7 @@ describe("some more nice things", function(){
     };
 
     Sugarless("Hello", { after: function(){ result = Sugarless(this).get('msg').join(" "); } })(
-       sayItFor, 5 
+       repeatFor, 5 
      , sayGoodBye
     );
 
