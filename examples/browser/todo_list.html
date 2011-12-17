@@ -27,8 +27,8 @@
 
     #completed_todos span {text-decoration: line-through;}
   </style>
-
 </head>
+
 <body>
   <div id="wrapper">
     <div class ="content" id="maincontent">
@@ -163,6 +163,7 @@
             );
           };
 
+          //check whether the given item is an array
           if(Array.isArray(item)){
             item.forEach(_add, this); 
           } 
