@@ -63,7 +63,7 @@ describe("normal flow", function(){
 
 describe("calling next", function(){
 
-  it("pops the next function in queue", function(){
+  it("executes the next function in queue", function(){
     var result = "";
     var second_func = function(){ return "second" };
     Sugarless({})(function(){ result = Sugarless(this).next()(); }, second_func);
@@ -112,11 +112,11 @@ describe("calling next", function(){
 
 describe("calling done", function(){
   it("decrements the running functions count", function(){
-    expect( Sugarless({})( function(){  }, function(){  }, function(){ Sugarless(this).done(); return Sugarless(this).get('_running')  } ) ).toEqual(1);
+    expect( Sugarless({})( function(){  }, function(){ Sugarless(this).done() }, function(){ Sugarless(this).done(); return Sugarless(this).get('_running')  } ) ).toEqual(1);
   }); 
 
   it("doesn't set a negative value to running functions count", function(){
-    expect( Sugarless({})( function(){ Sugarless(this).done(); return Sugarless(this).get('_running') } ) ).toEqual(0);
+    expect( Sugarless({}, {after: function(){ return Sugarless(this).get('_running') } })( function(){ Sugarless(this).done(); } ) ).toEqual(0);
   });
 
   it("calls the after function when there are no running functions", function(){
@@ -124,6 +124,10 @@ describe("calling done", function(){
     expect( Sugarless({}, {after: after_func})( 
             function(){  }, function(){  }, 
             function(){ Sugarless(this).done(); Sugarless(this).done(); return "finished" } ) ).toEqual("after");
+  });
+
+  it("will not call the after function if it's not defined", function(){
+    expect( Sugarless({})( function(){ Sugarless(this).done(); } ) ).toBeUndefined();
   });
 });
 
@@ -368,6 +372,7 @@ describe("some more nice things", function(){
     var sayGoodBye = function(){
       var msg = Sugarless(this).get('msg') || [];
       Sugarless(this).set('msg', msg.concat(["Good bye!"]));
+
       Sugarless(this).done();
     };
 
