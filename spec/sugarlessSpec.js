@@ -111,6 +111,7 @@ describe("calling next", function(){
 });
 
 describe("calling done", function(){
+
   it("decrements the running functions count", function(){
     expect( Sugarless({})( function(){  }, function(){ Sugarless(this).done() }, function(){ Sugarless(this).done(); return Sugarless(this).get('_running')  } ) ).toEqual(1);
   }); 
@@ -323,6 +324,7 @@ describe("using Sugarless invoke", function(){
 });
 
 describe("some more nice things", function(){
+
   it("aliasing", function(){
     var awesomeWrapper = Sugarless({}, {before: function(){ return "awesome" }}); 
     
