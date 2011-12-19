@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <title>Around You...</title>
+  <style>
+    body { margin:0; padding:0; font-family: Georgia, serif;} 
+    h1, h2 { text-align: center; }
+    h3 { margin: 0.5em 0; float: left; width: 100%; }
+    ul { list-style:none; margin:0 0 0.5em 0; padding:0; float: left; width: 100%; }
+    form { margin-bottom: 0.5em; }
+    input { font-size: 110%; margin: 0 auto; width: 100%; min-width: 100px; padding: 5px; font-family: Georgia, serif;}
+    p { font-size: 75%;}
+
+    .template { display: none; visibility: hidden; }
+
+    #wrapper { min-height: 100%; position: relative; margin: 0 auto; width: 60%; min-width: 280px;  }
+
+    #map_canvas { height: 300px; width: 400px;}
+    #photos li { float: left; margin: 10px; }
+    #tweets li { float: left; width: 100%; border-bottom: 1px #ccc solid; padding: 10px;}
+    #tweets li img { float: left; margin: 5px;}
+
+    #overlay { height: 100%; width: 100%; background-color: #ccc; position: absolute; top: 0; left: 0; }
+
+  </style>
+</head>
+
+<body>
+  <div id="wrapper">
+    <div class ="content" id="maincontent">
+      <h1>Around You...</h1>
+
+      <div id="map">
+        <h3>Map</h3>
+        <div id="map_canvas"></div>
+      </div>
+
+      <div id="photos">
+        <h3>Photos (via Instagram)</h3>
+        <ul>
+          <li class="template"><img src="thumbnail_path" alt="Title by user"/></li>
+        </ul>
+      </div>
+
+      <div id="tweets">
+        <h3>Tweets</h3>
+        <ul>
+          <li class="template"><img src="profile_pic"><span><a href="#">User</a>Tweet</span></li>
+        </ul>
+      </div>
+
+      <div id="overlay"><p>Loading...</p></div>
+
+    </div>
+  </div>
+
+  <script type="text/javascript"
+    src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCB64L1oepPXIYxCx6dGLSfdVUOf_2wB48&sensor=false"></script>
+  <script type="text/javascript" src="vendor/reqwest.js"></script>
+  <script type="text/javascript" src="../../lib/sugarless.js"></script>
+  <script type="text/javascript">
+    /* Shorthands */
+    var $_ = Sugarless;
+    var $ = function(sel){ return $_(document.querySelector(sel)) };
+
+    /* DOM helpers */
+    var domReady = function(callback){ document.addEventListener('DOMContentLoaded', callback); }
+
+    var createElementFromTemplate = function(template){
+        var item = template.cloneNode(true); 
+        var classes = item.className.split(" ");
+        classes.splice(classes.indexOf("template"), 1);
+        item.className = classes.join(" ");
+
+        return item;
+    };
+
+    var appendTo = function(container){
+      container.appendChild(this); 
+    };
+
+    /* Custom Functions */
+
+    var List = {
+      add: function(items, renderCallbacks){
+        var template = this.querySelector('.template');
+        var list = this;
+
+        //get one item from the items
+        var item = items.shift();
+
+        //render it
+        $_(createElementFromTemplate(template),
+           {
+            before: function(){ return item; },
+            after: function(){ appendTo.call(this, list) }
+           })( renderCallbacks );
+
+        if(items.length){
+          //recurse
+          $_(this).recurse(items);
+        }
+        else{
+          //done 
+          $_(this).done();
+        }
+      }
+
+    };
+
+    var mockGeolocation = function(){
+      var position = { coords: {latitude: 51.28, longitude: 0.1 } }
+      return { getCurrentPosition: function(callback){ return callback(position) } }
+    };
+
+    /* Behaviour calls */
+    domReady(function() {
+
+        $_( navigator.geolocation, { 
+          after: function(){ document.getElementById('overlay').style.display = 'none' },
+          fallback: mockGeolocation,
+          error: function(){ alert('an error occurred.')}
+        })(
+
+        //gets the lat. and long. and passes to the next function
+        function(){
+          var self = this;
+          var callback = $_(this).next();
+
+          this.getCurrentPosition(function(position) {  
+            //set the latitude and longitude to the current context
+            $_(self).set('coords', {latitude: position.coords.latitude, longitude: position.coords.longitude});
+
+            //proceed to next function in queue
+            callback();  
+          });  
+        },
+
+        //render google map
+        function(){
+          var coords = $_(this).get('coords');
+          var latlng = new google.maps.LatLng(coords.latitude, coords.longitude);
+          var opts = {
+            zoom: 10,
+            center: latlng,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+          };
+          var map = new google.maps.Map(document.getElementById("map_canvas"), opts);
+          $_(this).done();
+        },
+
+        //load the tweets
+        function(){
+          var self = this;
+          var coords = $_(this).get('coords');
+          reqwest({
+              url: 'http://search.twitter.com/search.json?q=*%20-@&geocode=' + coords.latitude + ',' + coords.longitude + ',15km'
+            , type: 'jsonp'
+            , success: function (resp) {
+                $("div#tweets ul")(
+                  List.add, resp.results, [
+                  function(data){ 
+                    this.innerHTML = '<img src="' + data.profile_image_url + '"><span><a href="http://twitter.com/' + data.from_user + '">' + data.from_user +  '</a> ' + data.text + '</span>';
+                    $_(this).done();
+                  } 
+                  ] 
+                );
+
+                $_(self).done();
+              }
+          });
+        },
+
+        //load photos from instagram 
+        function(){
+          var self = this;
+          var coords = $_(this).get('coords');
+          reqwest({
+              url: 'https://api.instagram.com/v1/media/search'
+            , data: {
+                      client_id: 'c111456b809240f2804697c863e179af', 
+                      lat: coords.latitude, 
+                      lng: coords.longitude, 
+                      distance: 5000
+                    }
+            , type: 'jsonp'
+            , success: function (resp) {
+                $("div#photos ul")(
+                  List.add, resp.data, [
+                  function(data){ 
+                    var img_tag = this.firstChild;
+                    img_tag.setAttribute('src', data.images.thumbnail.url);  
+                    img_tag.setAttribute('title', "by " + data.user.username);  
+
+                    $_(this).done();
+                  } 
+                  ] 
+                );
+
+                $_(self).done();
+              }
+          });
+        }
+      );
+
+    }); 
+  </script>
+</body>
+</html>
