@@ -64,7 +64,7 @@ Main Features
     // http://jsbin.com/akibac/edit#source
   ```
 
-What if the functions in the queue runs asynchrnously? One way to handle asynchrnous flow is to use `sugarless.next()` method. Calling it will halt the sequential evaluation of the context queue and returns the next function in the queue. You can use the function returned, as a callback for an asynchrnous call. 
+* What if the functions in the queue runs asynchronously? One way to handle asynchrnous flow is to use `sugarless.next()` method. Calling it will halt the sequential evaluation of the context queue and returns the next function in the queue. You can use the function returned, as a callback for an asynchronous call. 
 
   ```javascript
     $_({})(
@@ -76,7 +76,7 @@ What if the functions in the queue runs asynchrnously? One way to handle asynchr
     // http://jsbin.com/eruwuk/edit#source
   ```
 
-* Also, you can invoke several asynchronous functions parallely and use `after` callback to do a final evaluation under the context. You can mark the completion of a asynchrnous function with `sugarless.done()`. 
+* Also, you can invoke several asynchronous functions parallely and use `after` callback to do a final evaluation under the context. You can mark the completion of a asynchronous function with `sugarless.done()`. 
 
   ```javascript
     $_({}, {after: function(){ console.log('Finished running all functions')}})(
