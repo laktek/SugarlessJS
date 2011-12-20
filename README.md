@@ -222,17 +222,17 @@ FAQ
 
 **Why the name Sugarless?**
 
-<del>It won't use a sugar coating to hide the original problem from you.</del> 
+<del>Because it won't use a sugar coating to hide the original problem from you.</del> 
 
-Actually, I coded the initial concept while listening to this catchy tune: http://www.youtube.com/watch?v=mj2n-xrwOo0
+_Actually, I coded the initial concept of this while listening to this catchy tune :) http://www.youtube.com/watch?v=mj2n-xrwOo0 _
 
 **Can I use Sugarless with NodeJS?**
   
 Yes. Sugarless is available as an NPM package. Also, check the sample node.js server written using Sugarless in examples. 
 
-**How large is Sugarless? Does it have any dependencies**
+**How large is Sugarless? Does it have any dependencies?**
 
-Sugarless is a fairly small, self-contained library. The minified version is 2.64KB (1.04KB gzipped).
+Sugarless is a fairly small, self-contained library. The minified version is **2.64KB (1.04KB gzipped)**.
 
 **Before getting started with Sugarless I want to getter bettet grip with Functional programming concepts in JavaScript. From where should I start?**
   
