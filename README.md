@@ -5,16 +5,16 @@ Sugarless is a small utility library that gives you a powerful new way to think 
 
 It's a pure JavaScript library and can be used almost anywhere (in any platform, browser or library). No pre-compilers or other dependencies are needed.
 
-A Quick Example
+Quick Example
 ---------------
 
   ```javascript
 
   // Common way 
-  truncate(trim(sanitize(user_input)), 200)
+  var output = truncate(trim(sanitize(user_input)), 200)
   
   // Sugarless way
-  Sugarless(user_input)(
+  var output = Sugarless(user_input)(
     sanitize          
    ,trim             
    ,truncate, "", 200   
@@ -42,7 +42,7 @@ Highlights
 
     );
 
-    console.log(output);
+    console.log(output); // The Lord of the Rings by J.R.R.Tolkien is a bestseller
 
   ```
 
@@ -50,7 +50,7 @@ Highlights
   Note that the return value (or callback) of the previous function will override the default arguments. If you want to avoid this behaviour you can set the option `noreturn: true` for the context. 
 
   ```javascript
-    var concat = function(stem, sub){ return (stem || this) + " " +sub }
+    var concat = function(stem, sub){ return (stem || this) + " " + sub }
 
     var output = $_("This")(
                     concat, null, "is"        // forces to use context as the stem
@@ -58,7 +58,7 @@ Highlights
                   , concat, "", "sentence"
                  );
 
-    console.log(output);
+    console.log(output); // This is a sentence
 
   ```
 
@@ -130,7 +130,7 @@ Highlights
         $_(this).set('score', 75); 
       },
       function(){
-        console.log( $_(this).get('score') ); 
+        console.log( $_(this).get('score') );  // 75
       }
     );
 
@@ -145,8 +145,7 @@ Highlights
       }
     );
 
-    console.log(awesome_value);
-    // prints null
+    console.log(awesome_value); // null
 
   ```
 
@@ -201,7 +200,7 @@ Highlights
     $_(magnitude)(
       $_.invoke, "speak" 
     , function(quote){ 
-        console.log(this.name + " says " + quote);
+        console.log(this.name + " says " + quote); // Magnitude says POP! POP!
       }
     );
   ```
@@ -221,21 +220,21 @@ Extract the files and copy 'minified/sugarless.min.js' to your project.
 FAQ
 ---
 
-** Why the name Sugarless? **
+**Why the name Sugarless?**
 
 <del>It won't use a sugar coating to hide the original problem from you.</del> 
 
 Actually, I coded the initial concept while listening to this catchy tune: http://www.youtube.com/watch?v=mj2n-xrwOo0
 
-** Can I use Sugarless with NodeJS? **
+**Can I use Sugarless with NodeJS?**
   
 Yes. Sugarless is available as an NPM package. Also, check the sample node.js server written using Sugarless in examples. 
 
-** How large is Sugarless? Does it have any dependencies **
+**How large is Sugarless? Does it have any dependencies**
 
 Sugarless is a fairly small, self-contained library. The minified version is 2.64KB (1.04KB gzipped).
 
-** Before getting started with Sugarless I want to getter bettet grip with Functional programming concepts in JavaScript. Where should I look? **
+**Before getting started with Sugarless I want to getter bettet grip with Functional programming concepts in JavaScript. From where should I start?**
   
 Eloquent JavaScript's chapter on Functional Programming is pretty comprehensive, a recommended read - http://eloquentjavascript.net/chapter6.html
 
