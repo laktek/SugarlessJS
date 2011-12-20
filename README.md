@@ -24,11 +24,11 @@ A Quick Example
 Main Features
 -------------
 
-Context can be any JavaScript object (host or user-defined) or a primitive value (primitive values will be converted to objects).
+* Context can be any JavaScript object (host or user-defined) or a primitive value (primitive values will be converted to objects).
 
-All functions in a given context are invoked with `this` value set to the context.
+* All functions in a given context are invoked with `this` value set to the context.
 
-When evaluating a context queue, return value of one function will be passed on to the next function in the queue as the first argument. 
+* When evaluating a context queue, return value of one function will be passed on to the next function in the queue as the first argument. 
   Last function's return value will be the final result. 
 
   ```javascript
@@ -47,7 +47,7 @@ When evaluating a context queue, return value of one function will be passed on 
     // http://jsbin.com/izunot/edit#source
   ```
 
-You can provide a list of default arguments to be passed on to a function.
+* You can provide a list of default arguments to be passed on to a function.
   Keep in mind that the return value (or callback) of the previous function will override the default arguments.
 
   ```javascript
@@ -76,7 +76,7 @@ What if the functions in the queue runs asynchrnously? One way to handle asynchr
     // http://jsbin.com/eruwuk/edit#source
   ```
 
-Also, you can invoke several asynchronous functions parallely and use `after` callback to do a final evaluation under the context. You can mark the completion of a asynchrnous function with `sugarless.done()`. 
+* Also, you can invoke several asynchronous functions parallely and use `after` callback to do a final evaluation under the context. You can mark the completion of a asynchrnous function with `sugarless.done()`. 
 
   ```javascript
     $_({}, {after: function(){ console.log('Finished running all functions')}})(
@@ -88,7 +88,7 @@ Also, you can invoke several asynchronous functions parallely and use `after` ca
     // http://jsbin.com/eliwux/edit#source 
   ```
 
-Rather than cascading to the next function in the queue, you can recursively invoke the current function by calling `sugarless.recurse()`.  
+* Rather than cascading to the next function in the queue, you can recursively invoke the current function by calling `sugarless.recurse()`.  
 
   ```javascript
   var copy_array = function(params){ 
@@ -107,7 +107,7 @@ Rather than cascading to the next function in the queue, you can recursively inv
   );
   ```
 
-If the you pass a null or undefined context, Sugarless will return null without executing any given function.
+* If the you pass a null or undefined context, Sugarless will return null without executing any given function.
 
   ```javascript
   var awesome_value = $_(null)(
@@ -121,7 +121,7 @@ If the you pass a null or undefined context, Sugarless will return null without 
   // http://jsbin.com/izohuy/edit#source
   ```
 
-You can pass-in a optional `fallback` context (a function or an object) in case of default context is undefined or null.
+* You can pass-in a optional `fallback` context (a function or an object) in case of default context is undefined or null.
 
   ```javascript
   var awesome_value = $_(null, {fallback: function(){ return "simple"} })(
@@ -135,7 +135,7 @@ You can pass-in a optional `fallback` context (a function or an object) in case 
   // http://jsbin.com/isiwag/edit#source
   ```
 
-You can provide callbacks to `before` and `after` the context queue. Useful when you want to write wrappers with Sugarless.
+* You can provide callbacks to `before` and `after` the context queue. Useful when you want to write wrappers with Sugarless.
 
   ```javascript
    var user_name = "John";
@@ -156,7 +156,7 @@ You can provide callbacks to `before` and `after` the context queue. Useful when
 
   Note: `after` callback will only invoke if all functions in the given context finish execution. Returning a value will automatically marks a function as executed. If a function returns nothing, you need to explicitly call `sugarless.done()` to mark the function as executed.
 
-You can provide an optional `error` function to handle exceptions that occurs in context queue.
+* You can provide an optional `error` function to handle exceptions that occurs in context queue.
 
   ```javascript
   $_({}, {error: function(){ console.log("An error occurred.") } })(
