@@ -1,12 +1,12 @@
 # SugarlessJS
-## Functional & Context Oriented way to write JavaScript
+### Functional & Context Oriented way to write JavaScript
 
-Sugarless is a small utility library that gives you a powerful new way express your JavaScript code. Rather than thinking in terms of Objects and their methods, Sugarless let's you think in terms of contexts and invoke functions based on the context. 
+Sugarless is a small utility library that gives you a powerful new way to think and organize your JavaScript programs. With Sugarless, you can organize your program into contexts and use functions to apply behaviour. 
 
-It's a pure JavaScript library and can be used almost anywhere (in any platform, browser or library). No pre-compilations or other dependencies involved.
+It's a pure JavaScript library and can be used almost anywhere (in any platform, browser or library). No pre-compilers or other dependencies are needed.
 
 A Quick Example
-------------
+---------------
 
   ```javascript
 
@@ -21,8 +21,8 @@ A Quick Example
   )
   ```
 
-Main Features
--------------
+Highlights
+----------
 
 * Context can be any JavaScript object (host or user-defined) or a primitive value (primitive values will be converted to objects).
 
@@ -44,11 +44,10 @@ Main Features
 
     console.log(output)
 
-    // http://jsbin.com/izunot/edit#source
   ```
 
 * You can provide a list of default arguments to be passed on to a function.
-  Keep in mind that the return value (or callback) of the previous function will override the default arguments.
+  Note that the return value (or callback) of the previous function will override the default arguments. If you want to avoid this behaviour you can set the option `noreturn: true` for the context. 
 
   ```javascript
     var concat = function(stem, sub){ return (stem || this) + " " +sub }
@@ -61,10 +60,9 @@ Main Features
 
     console.log(output);
 
-    // http://jsbin.com/akibac/edit#source
   ```
 
-* What if the functions in the queue runs asynchronously? One way to handle asynchrnous flow is to use `sugarless.next()` method. Calling it will halt the sequential evaluation of the context queue and returns the next function in the queue. You can use the function returned, as a callback for an asynchronous call. 
+* What if the functions in the queue runs asynchronously? One way to handle asynchronous flow is to use `sugarless.next()` method. Calling it will halt the sequential evaluation of the context queue and returns the next function in the queue. You can use the function returned, as a callback for an asynchronous call. 
 
   ```javascript
     $_({})(
@@ -73,10 +71,9 @@ Main Features
      , function() { console.log("third function") }
     )
 
-    // http://jsbin.com/eruwuk/edit#source
   ```
 
-* Also, you can invoke several asynchronous functions parallely and use `after` callback to do a final evaluation under the context. You can mark the completion of a asynchronous function with `sugarless.done()`. 
+* Also, you can invoke several asynchronous functions parallely and then use an `after` callback to do a final computation under the context. You can mark the completion of a asynchronous function with `sugarless.done()`. 
 
   ```javascript
     $_({}, {after: function(){ console.log('Finished running all functions')}})(
@@ -85,73 +82,102 @@ Main Features
     ,   function() { var self = this; setTimeout(function(){ $_(self).done() }, 60) }
     );
 
-    // http://jsbin.com/eliwux/edit#source 
   ```
 
-* Rather than cascading to the next function in the queue, you can recursively invoke the current function by calling `sugarless.recurse()`.  
+* Using `sugarless.recurse()` you can recursively call the current function. 
+  By returning or calling `sugarless.done()` you can end recursion and move on to the next function in the queue. 
 
   ```javascript
-  var copy_array = function(params){ 
-    if(params.length){
-      this.push(params.shift());
-      $_(this).recurse(params);
-    }
-    else {
-      $_(this).done();
-    }
-  };
+    var copy_array = function(params){ 
+      if(params.length){
+        this.push(params.shift());
+        $_(this).recurse(params);
+      }
+      else {
+        $_(this).done();
+      }
+    };
 
-  ($_([])(
-    copy_array, ["one", "two", "three"]
-  , function(){ console.log(this); }
-  );
+    $_([])(
+      copy_array, ["one", "two", "three"]
+    , function(){ console.log(this); }
+    );
+
   ```
 
-* If the you pass a null or undefined context, Sugarless will return null without executing any given function.
+* Calling `sugarless.clear()` will clear the remaining functions in the queue and exit the context with the result of the current function.
 
   ```javascript
-  var awesome_value = $_(null)(
-    function(){
-      return this + " is awesome"
-    }
-  );
+    $_({})(
+      function(){ 
+        console.log("This will be printed."); 
+        if(true){
+          $_(this).clear();
+        }
+      },
+      function(){
+        console.log("This will not be printed."); 
+      }
+    );
 
-  console.log(awesome_value) //null
-
-  // http://jsbin.com/izohuy/edit#source
   ```
 
-* You can pass-in a optional `fallback` context (a function or an object) in case of default context is undefined or null.
+* Using `sugarless.set()` you can set properties for the current context. Using `sugarless.get()` you can retrive previously set properties. 
 
   ```javascript
-  var awesome_value = $_(null, {fallback: function(){ return "simple"} })(
-    function(){
-      return this + " is awesome"
-    }
-  );
+    $_({})(
+      function(){ 
+        $_(this).set('score', 75); 
+      },
+      function(){
+        console.log( $_(this).get('score') ); 
+      }
+    );
 
-  console.log(awesome_value) //simple is awesome
+  ```
 
-  // http://jsbin.com/isiwag/edit#source
+* If the context is null or undefined, Sugarless will return null without executing any function in the context queue.
+
+  ```javascript
+    var awesome_value = $_(null)(
+      function(){
+        return this + " is awesome"
+      }
+    );
+
+    console.log(awesome_value) //null
+
+  ```
+
+* You can pass an optional `fallback` context (a function or an object) in case of default context is undefined or null.
+
+  ```javascript
+    var awesome_value = $_(null, {fallback: function(){ return "simple"} })(
+      function(){
+        return this + " is awesome"
+      }
+    );
+
+    console.log(awesome_value) //simple is awesome
+
   ```
 
 * You can provide callbacks to `before` and `after` the context queue. Useful when you want to write wrappers with Sugarless.
 
   ```javascript
-   var user_name = "John";
-   var user_age = 25
+    var user_name = "John";
+    var user_age = 25
 
-   $_(user_name, 
-     {
-       before: function(){ return {name: this} },  //returns a new object wrapping the context
-       after: function(obj){ console.log(obj.name + " is " + obj.age + " old."); } 
-     }
-    )(
-     function(obj){ obj.age = user_age; return obj; }
-   , function(obj){ console.log(obj.name); $_(this).done(obj); }
-  );
+    $_(user_name, 
+      {
+        before: function(){ return {name: this} },  //returns a new object wrapping the context
+        after: function(obj){ console.log(obj.name + " is " + obj.age + " old."); } 
+      }
+     )(
+      function(obj){ obj.age = user_age; return obj; }
+    , function(obj){ console.log(obj.name); $_(this).done(obj); }
+    );
 
-  // http://jsbin.com/igupir/edit#source
   ```
 
   Note: `after` callback will only invoke if all functions in the given context finish execution. Returning a value will automatically marks a function as executed. If a function returns nothing, you need to explicitly call `sugarless.done()` to mark the function as executed.
@@ -159,22 +185,35 @@ Main Features
 * You can provide an optional `error` function to handle exceptions that occurs in context queue.
 
   ```javascript
-  $_({}, {error: function(){ console.log("An error occurred.") } })(
-    function(){
-      throw "Bad Error";
-    }
-  );
+    $_({}, {error: function(){ console.log("An error occurred.") } })(
+      function(){
+        throw "Bad Error";
+      }
+    );
 
-  // http://jsbin.com/efakij/edit#source
+    // http://jsbin.com/efakij/edit#source
   ```
+
+* If you want to invoke a member function of context's object (or available in it's prototype chain), you can use the shorthand function `Sugarless.invoke`. It takes the member function to be evaluated as a string and any number of arguments, which will be passed to the member function.
+
+  ```javascript
+    var magnitude = {name: "Magnitude", college: "Greendale CC", speak: function(){ return "POP! POP!" } };
+    $_(magnitude)(
+      $_.invoke, "speak" 
+    , function(quote){ 
+        console.log(this.name + " says " + quote);
+      }
+    );
+
+  ```
+
 Installation
 ------------
 
 You can install Sugarless via NPM.
 
   ```bash
-  npm install sugarless
-
+    npm install sugarless
   ```
 Alternatively, you can download Sugarless from here - https://github.com/laktek/SugarlessJS/downloads
 Extract the files and copy 'minified/sugarless.min.js' to your project.
@@ -182,25 +221,29 @@ Extract the files and copy 'minified/sugarless.min.js' to your project.
 FAQ
 ---
 
-* Why the name Sugarless?
+** Why the name Sugarless? **
 
-  <del>It won't use a sugar coating to hide the original problem from you.</del> 
+<del>It won't use a sugar coating to hide the original problem from you.</del> 
 
-  Actually, I coded the initial concept while listening to this catchy tune: http://www.youtube.com/watch?v=mj2n-xrwOo0
+Actually, I coded the initial concept while listening to this catchy tune: http://www.youtube.com/watch?v=mj2n-xrwOo0
 
-* Can I use Sugarless with NodeJS?
+** Can I use Sugarless with NodeJS? **
   
-  Yes. Sugarless is available as an NPM package. Also, check the sample node.js server written using Sugarless in examples. 
+Yes. Sugarless is available as an NPM package. Also, check the sample node.js server written using Sugarless in examples. 
 
-* How large is Sugarless?
+** How large is Sugarless? Does it have any dependencies **
 
-  Sugarless is a fairly small library. The minified version is 2.64KB (1.04KB gzipped)
+Sugarless is a fairly small, self-contained library. The minified version is 2.64KB (1.04KB gzipped).
 
-* Before getting started with Sugarless I want to getter bettet grip with Functional programming concepts in JavaScript. Where should I look?
+** Before getting started with Sugarless I want to getter bettet grip with Functional programming concepts in JavaScript. Where should I look? **
   
-  Eloquent JavaScript's chapter on Functional Programming is pretty comprehensive, a recommended read - http://eloquentjavascript.net/chapter6.html
+Eloquent JavaScript's chapter on Functional Programming is pretty comprehensive, a recommended read - http://eloquentjavascript.net/chapter6.html
+
+Another good read is "Understanding JavaScript Function Invocation and 'this'" by Yehuda Katz - http://yehudakatz.com/2011/08/11/understanding-javascript-function-invocation-and-this/
 
 Issues & Suggestions
 --------------------
+
 Please report any bugs or feature requests here:
 http://github.com/laktek/SugarlessJS/issues/
+
