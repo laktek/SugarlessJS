@@ -1,5 +1,5 @@
 # SugarlessJS
-### Functional & Context Oriented way to write JavaScript
+### A Functional & Context Oriented way to write JavaScript
 
 Sugarless is a small utility library that gives you a powerful new way to think and organize your JavaScript programs. With Sugarless, you can organize your program into contexts and use functions to apply behaviour. 
 
@@ -18,7 +18,7 @@ A Quick Example
     sanitize          
    ,trim             
    ,truncate, "", 200   
-  )
+  );
   ```
 
 Highlights
@@ -42,7 +42,7 @@ Highlights
 
     );
 
-    console.log(output)
+    console.log(output);
 
   ```
 
@@ -69,7 +69,7 @@ Highlights
        function(){ setTimeout($_(this).next(), 60) }
      , function() { console.log("second function") }
      , function() { console.log("third function") }
-    )
+    );
 
   ```
 
@@ -145,7 +145,8 @@ Highlights
       }
     );
 
-    console.log(awesome_value) //null
+    console.log(awesome_value);
+    // prints null
 
   ```
 
@@ -158,7 +159,7 @@ Highlights
       }
     );
 
-    console.log(awesome_value) //simple is awesome
+    console.log(awesome_value); //simple is awesome
 
   ```
 
@@ -191,7 +192,6 @@ Highlights
       }
     );
 
-    // http://jsbin.com/efakij/edit#source
   ```
 
 * If you want to invoke a member function of context's object (or available in it's prototype chain), you can use the shorthand function `Sugarless.invoke`. It takes the member function to be evaluated as a string and any number of arguments, which will be passed to the member function.
@@ -204,7 +204,6 @@ Highlights
         console.log(this.name + " says " + quote);
       }
     );
-
   ```
 
 Installation
@@ -215,6 +214,7 @@ You can install Sugarless via NPM.
   ```bash
     npm install sugarless
   ```
+
 Alternatively, you can download Sugarless from here - https://github.com/laktek/SugarlessJS/downloads
 Extract the files and copy 'minified/sugarless.min.js' to your project.
 
