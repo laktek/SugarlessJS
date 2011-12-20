@@ -238,7 +238,7 @@ Sugarless is a fairly small, self-contained library. The minified version is **2
 
 Of course. You can start using Sugarless to refactor a section or to implement something new. Sugarless will not have any affect on your existing JavaScript code.
  
-**Before getting started with Sugarless I want to getter bettet grip with Functional programming concepts in JavaScript. From where should I start?**
+**Before getting started with Sugarless I want to get a better grip with Functional programming concepts in JavaScript. Where should I start?**
   
 Eloquent JavaScript's chapter on Functional Programming is pretty comprehensive, a recommended read - http://eloquentjavascript.net/chapter6.html
 
