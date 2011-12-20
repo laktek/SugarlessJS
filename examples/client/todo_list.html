@@ -105,7 +105,7 @@
       polyfill: { data: [], getItem: function(){ return JSON.stringify(this.data); }, setItem: function(){ return this.data.push(arguments[0]) } },
 
       fetch: function(){ 
-        return $_(window['localStorage'], { defaultObj: Store.polyfill })(
+        return $_(window['localStorage'], { fallback: Store.polyfill })(
             $_.invoke, "getItem", this.id 
           , function(){ return arguments[0] }, "[]" //pass a default value
           , JSON.parse
@@ -116,7 +116,7 @@
         var items = Store.fetch.call(this);
         items.push(item)
 
-        $_(window['localStorage'], { defaultObj: Store.polyfill })(
+        $_(window['localStorage'], { fallback: Store.polyfill })(
           $_.invoke, ["setItem", this.id, JSON.stringify(items)] 
         );
 
@@ -127,7 +127,7 @@
         var items = Store.fetch.call(this);
         items.splice(items.indexOf(item), 1);
 
-        $_(window['localStorage'], { defaultObj: Store.polyfill })(
+        $_(window['localStorage'], { fallback: Store.polyfill })(
           $_.invoke, ["setItem", this.id, JSON.stringify(items)] 
         );
       }
