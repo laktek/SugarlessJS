@@ -1,7 +1,7 @@
 # SugarlessJS
 ### A Functional & Context Oriented way to write JavaScript
 
-Sugarless is a small utility library that gives you a powerful new way to think and organize your JavaScript programs. Rather than Objects and methods, Sugarless focuses on Contexts and cascading behaviours. 
+Sugarless is a small utility library that gives you a powerful new way to think and organize your JavaScript programs. Sugarless lets you define contexts and cascading chain of functions to run on each context. 
 
 It's a pure JavaScript library and can be used in any platform, browser or library. No pre-compilers or other dependencies are needed.
 
@@ -28,7 +28,7 @@ Highlights
 
 * All functions in a given context are executed with the context bound to it. Which means functions can have access to context via `this` variable.
 
-* When evaluating a context queue, return value of one function will be passed on to the next function in the queue as the first argument. 
+* When evaluating a context chain, return value of one function will be passed on to the next function in the chain as the first argument. 
   Last function's return value will be the final result. 
 
   ```javascript
@@ -62,7 +62,7 @@ Highlights
 
   ```
 
-* What if the functions in the queue runs asynchronously? One way to handle asynchronous flow is to use `sugarless.next()` method. Calling it will halt the sequential evaluation of the context queue and returns the next function in the queue. You can use the function returned, as a callback for an asynchronous call. 
+* What if the functions in the chain runs asynchronously? One way to handle asynchronous flow is to use `sugarless.next()` method. Calling it will halt the sequential evaluation of the context chain and returns the next function in the chain. You can use the function returned, as a callback for an asynchronous call. 
 
   ```javascript
     $_({})(
@@ -85,7 +85,7 @@ Highlights
   ```
 
 * Using `sugarless.recurse()` you can recursively call the current function. 
-  By returning a value or calling `sugarless.done()` you can end recursion and move on to the next function in the queue. 
+  By returning a value or calling `sugarless.done()` you can end recursion and move on to the next function in the chain. 
 
   ```javascript
     var copy_array = function(params){ 
@@ -105,7 +105,7 @@ Highlights
 
   ```
 
-* Calling `sugarless.clear()` will clear the remaining functions in the queue and exit the context with the result of the current function.
+* Calling `sugarless.clear()` will clear the remaining functions in the chain and exit the context with the result of the current function.
 
   ```javascript
     $_({})(
@@ -136,7 +136,7 @@ Highlights
 
   ```
 
-* If the context is `null` or `undefined`, Sugarless will return `null` without executing any function in the context queue.
+* If the context is `null` or `undefined`, Sugarless will return `null` without executing any function in the context chain.
 
   ```javascript
     var awesome_value = $_(null)(
@@ -162,7 +162,7 @@ Highlights
 
   ```
 
-* You can provide callbacks to `before` and `after` the context queue. Useful when you want to write wrappers with Sugarless.
+* You can provide callbacks to run `before` and `after` the context chain. Useful when you want to write wrappers with Sugarless.
 
   ```javascript
     var user_name = "John";
@@ -182,7 +182,7 @@ Highlights
 
   Note: `after` callback will only invoke if all functions in the given context finish execution. Returning a value will automatically marks a function as executed. If a function returns nothing, you need to explicitly call `sugarless.done()` to mark the function as executed.
 
-* You can provide an optional `error` function to handle exceptions that occurs in context queue.
+* You can provide an optional `error` function to handle exceptions that occurs in context chain.
 
   ```javascript
     $_({}, {error: function(){ console.log("An error occurred.") } })(
