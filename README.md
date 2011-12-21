@@ -21,8 +21,8 @@ Quick Example
   );
   ```
 
-Highlights
-----------
+Main Features
+------------
 
 * Context can be any JavaScript object (host or user-defined) or a primitive value (primitive values will be converted to objects).
 
@@ -68,7 +68,7 @@ NOTE: We use `$_` as a shorthand identifier to refer Sugarless in these examples
 
   ```javascript
     $_({})(
-       function(){ setTimeout($_(this).next(), 60) }
+       function() { setTimeout($_(this).next(), 60) }
      , function() { console.log("second function") }
      , function() { console.log("third function") }
     );
@@ -86,8 +86,7 @@ NOTE: We use `$_` as a shorthand identifier to refer Sugarless in these examples
 
   ```
 
-* Using `sugarless.recurse()` you can recursively call the current function. 
-  By returning a value or calling `sugarless.done()` you can end recursion and move on to the next function in the chain. 
+* Using `sugarless.recurse(value)` you can recursively call the current function with the same context and the value is passed as the first argument. If you had other arguments defined for the function those shall also be passed to it. By returning a value or calling `sugarless.done()` you can end recursion and move on to the next function in the chain. 
 
   ```javascript
     var copy_array = function(params){ 

@@ -2,7 +2,7 @@
     "name": "sugarless"
   , "description": "A Functional & Context Oriented way to write JavaScript"
   , "keywords": ["functional", "context", "async"]
-  , "version": "0.0.1-alpha"
+  , "version": "0.0.1-beta"
   , "homepage": "https://github.com/laktek/SugarlessJS"
   , "author": "Lakshan Perera <lakshan@web2media.net> (http://laktek.com)"
   , "repository": {
