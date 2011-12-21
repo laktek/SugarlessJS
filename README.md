@@ -26,7 +26,7 @@ Highlights
 
 * Context can be any JavaScript object (host or user-defined) or a primitive value (primitive values will be converted to objects).
 
-* All functions in a given context are invoked with `this` value set to the context.
+* All functions in a given context are executed with the context bound to it. Which means functions can have access to context via `this` variable.
 
 * When evaluating a context queue, return value of one function will be passed on to the next function in the queue as the first argument. 
   Last function's return value will be the final result. 
@@ -85,7 +85,7 @@ Highlights
   ```
 
 * Using `sugarless.recurse()` you can recursively call the current function. 
-  By returning or calling `sugarless.done()` you can end recursion and move on to the next function in the queue. 
+  By returning a value or calling `sugarless.done()` you can end recursion and move on to the next function in the queue. 
 
   ```javascript
     var copy_array = function(params){ 
@@ -136,7 +136,7 @@ Highlights
 
   ```
 
-* If the context is null or undefined, Sugarless will return null without executing any function in the context queue.
+* If the context is `null` or `undefined`, Sugarless will return `null` without executing any function in the context queue.
 
   ```javascript
     var awesome_value = $_(null)(
@@ -149,7 +149,7 @@ Highlights
 
   ```
 
-* You can pass an optional `fallback` context (a function or an object) in case of default context is undefined or null.
+* You can pass an optional `fallback` context (a function or an object) in case of default context is `undefined` or `null`.
 
   ```javascript
     var awesome_value = $_(null, {fallback: function(){ return "simple"} })(
@@ -224,7 +224,7 @@ FAQ
 
 <del>Because it won't use a sugar coating to hide the original problem from you.</del> 
 
-_Actually, I coded the initial concept of this while listening to this catchy tune :) http://www.youtube.com/watch?v=mj2n-xrwOo0 _
+Actually, I coded the initial concept of this while listening to this catchy tune :) http://www.youtube.com/watch?v=mj2n-xrwOo0
 
 **Can I use Sugarless with NodeJS?**
   
