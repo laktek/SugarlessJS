@@ -1,7 +1,7 @@
 # SugarlessJS
 ### A Functional & Context Oriented way to write JavaScript
 
-Sugarless is a small utility library that gives you a powerful new way to think and organize your JavaScript programs. With Sugarless we define a context and plug behaviours to the context in the form of cascading chain of functions. 
+Sugarless is a small utility library that gives you a powerful new way to think and organize your JavaScript programs. With Sugarless, we define a context and plug behaviours to the context in the form of cascading chain of functions. 
 
 It's a pure JavaScript library and can be used in any platform, browser or library. No pre-compilers or other dependencies are needed.
 
@@ -26,10 +26,12 @@ Highlights
 
 * Context can be any JavaScript object (host or user-defined) or a primitive value (primitive values will be converted to objects).
 
-* All functions in a given context are executed with the context bound to it. Which means functions can have access to context via `this` variable.
+* All functions in a given context will invoke with the context bound to it. This means functions can have access to context via `this` variable.
 
 * When evaluating a context chain, return value of one function will be passed on to the next function in the chain as the first argument. 
   Last function's return value will be the final result. 
+
+NOTE: We use `$_` as a shorthand identifier to refer Sugarless in these examples. You are free to use any identifier you like.
 
   ```javascript
     var $_ = Sugarless; //let's define a shorthand
